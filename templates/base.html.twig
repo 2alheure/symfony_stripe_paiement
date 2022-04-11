@@ -15,12 +15,14 @@
 
     <nav class="nav justify-content-center">
         <a class="nav-link active" href="{{ path('home') }}">Home</a>
-        <a class="nav-link" href="#">Link</a> {% if app.user %}
+        <a class="nav-link" href="{{ path('app_produits') }}">Produits</a> {% if app.user %}
         <a class="nav-link" href="{{ path('app_logout') }}">Disconnect</a> {% else %}
         <a class="nav-link" href="{{ path('app_login') }}">Connect</a> {% endif %}
     </nav>
 
-    {% block body%}{% endblock %}
+    <div class="container">
+        {% block body%}{% endblock %}
+    </div>
 
     <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
