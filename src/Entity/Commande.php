@@ -15,7 +15,7 @@ class Commande
     #[ORM\Column(type: 'integer')]
     private $id;
 
-    #[ORM\ManyToMany(targetEntity: Produit::class)]
+    #[ORM\ManyToMany(targetEntity: Produit::class, cascade:['persist'])]
     private $produits;
 
     #[ORM\Column(type: 'string', length: 255)]

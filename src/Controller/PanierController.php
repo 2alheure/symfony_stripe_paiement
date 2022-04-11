@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Produit;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -10,6 +11,9 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
+/**
+ * @IsGranted("ROLE_USER")
+ */
 class PanierController extends AbstractController {
     #[Route('/add-panier/{produit}', name: 'add_panier')]
     public function index(Produit $produit, SessionInterface $session, Request $request): Response {
@@ -34,8 +38,18 @@ class PanierController extends AbstractController {
     public function show(SessionInterface $session): Response {
         $panier = $session->get('panier', []);
 
+        $tva = 0;
+        $total = 0;
+        foreach ($panier as $entree) {
+            $produit = $entree['produit'];
+            $tva += $produit->getPrix() * $entree['quantite'] * $produit->getTauxTva() / 100;
+            $total += $produit->getPrix() * $entree['quantite'];
+        }
+
         return $this->render('panier/index.html.twig', [
-            'panier' => $panier
+            'panier' => $panier,
+            'total' => $total,
+            'tva' => $tva,
         ]);
     }
 

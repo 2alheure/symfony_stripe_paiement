@@ -22,4 +22,20 @@
 </table>
 
 
+<dl class="row">
+    <div class="col-4">
+        <dt>Total</dt>
+        <dd>{{total}}&nbsp;€</dd>
+    </div>
+
+    <div class="col-4">
+        <dt>Dont TVA</dt>
+        <dd>{{tva}}&nbsp;€</dd>
+    </div>
+
+    <a href="{{ path('payment') }}" class="btn btn-primary col-2 offset-col-1 justify-content-center align-items-center">
+        <i class="fa fa-credit-card-alt" aria-hidden="true"></i> Payer
+    </a>
+</dl>
+
 {% endblock %}
