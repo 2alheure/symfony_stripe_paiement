@@ -1,0 +1,25 @@
+{% extends 'base.html.twig' %} {% block title %}Mon panier{% endblock %} {% block body %}
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Produit</th>
+            <th>Prix unitaire</th>
+            <th>Quantité</th>
+            <th>Prix total</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for entree in panier %}
+        <tr>
+            <td>{{ entree.produit.nom }}</td>
+            <td>{{ entree.produit.prix }}&nbsp;€</td>
+            <td>{{ entree.quantite }}</td>
+            <td>{{ entree.quantite * entree.produit.prix }}&nbsp;€</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+
+{% endblock %}

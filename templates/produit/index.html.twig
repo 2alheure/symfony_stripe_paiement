@@ -18,7 +18,7 @@
         <tr>
             <td><img src="{{ produit.image }}" style="max-width: 50px; max-height: 50px"></td>
             <td>{{ produit.nom }}</td>
-            <td>{{ produit.prix }}</td>
+            <td>{{ produit.prix }}&nbsp;€</td>
             <td>{{ produit.stock }}</td>
 
             {% if app.user and produit.stock > 0 %}
@@ -39,4 +39,5 @@
     </tbody>
 </table>
 
-{% endblock %}
+{% if app.user %}
+<a class="nav-link" href="{{ path('vider_panier') }}">Vider le panier</a> {% endif %} {% endblock %}
