@@ -6,7 +6,11 @@
             <th>Image</th>
             <th>Nom</th>
             <th>Prix</th>
+            <th>Stock</th>
+
+            {% if app.user %}
             <th>Action</th>
+            {% endif %}
         </tr>
     </thead>
     <tbody>
@@ -15,7 +19,21 @@
             <td><img src="{{ produit.image }}" style="max-width: 50px; max-height: 50px"></td>
             <td>{{ produit.nom }}</td>
             <td>{{ produit.prix }}</td>
-            <td></td>
+            <td>{{ produit.stock }}</td>
+
+            {% if app.user and produit.stock > 0 %}
+            <td>
+                <form action="{{ path('add_panier', {produit: produit.id}) }}" method="post">
+                    <input type="number" name="qtte" id="qtte" min="1" max="{{produit.stock}}" step="1" placeholder="Quantité" style="max-width: 50px;" value="1">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fa fa-shopping-cart" aria-hidden="true"></i>
+                    </button>
+                </form>
+            </td>
+            {% elseif app.user and produit.stock == 0 %}
+            <td class="text-danger">Rupture de stock</td>
+            {% endif %}
+
         </tr>
         {% endfor %}
     </tbody>
