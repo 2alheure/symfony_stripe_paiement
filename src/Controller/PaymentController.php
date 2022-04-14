@@ -5,6 +5,7 @@ namespace App\Controller;
 use Stripe\Stripe;
 use App\Entity\Commande;
 use Stripe\Checkout\Session;
+use App\Repository\ProduitRepository;
 use App\Repository\CommandeRepository;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -20,7 +21,7 @@ use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
  */
 class PaymentController extends AbstractController {
     #[Route('/', name: 'payment')]
-    public function index(SessionInterface $session, CommandeRepository $cr): Response {
+    public function index(SessionInterface $session, ProduitRepository $pr, CommandeRepository $cr): Response {
         $panier = $session->get('panier', []);
 
         Stripe::setApiKey($this->getParameter('stripeSecretKey'));
@@ -30,13 +31,16 @@ class PaymentController extends AbstractController {
             return $this->redirectToRoute('app_produits');
         }
 
+        $ids = array_keys($panier);
+        $produits = $pr->getAllProduits($ids);
+
         $commande = new Commande;
         $commande->setEtat('En cours');
         $commande->setToken(hash('sha256', random_bytes(32)));
         $line_items = [];
 
-        foreach ($panier as $entree) {
-            $produit = $entree['produit'];
+        foreach ($panier as $id => $quantite) {
+            $produit = $produits[$id];
             $commande->addProduit($produit);
 
             $line_items[] = [
@@ -48,7 +52,7 @@ class PaymentController extends AbstractController {
                     ],
                     'unit_amount' => $produit->getPrix() * 100 // Montant en centimes
                 ],
-                'quantity' => $entree['quantite'],
+                'quantity' => $quantite,
             ];
         }
 
@@ -74,7 +78,7 @@ class PaymentController extends AbstractController {
         ]);
 
         if (empty($commande)) throw new AccessDeniedHttpException;
-        
+
         $session->set('panier', []);
         $commande->setEtat('Payée');
         $cr->add($commande);

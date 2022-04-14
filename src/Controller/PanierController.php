@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Produit;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
+use App\Repository\ProduitRepository;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -23,11 +24,9 @@ class PanierController extends AbstractController {
 
         $panier = $session->get('panier', []);
 
-        if (!empty($panier[$produit->getId()])) $panier[$produit->getId()]['quantite'] = min($quantite + $panier[$produit->getId()], $produit->getStock());
-        else $panier[$produit->getId()] = [
-            'quantite' => min($quantite, $produit->getStock()),
-            'produit' => $produit
-        ];
+        if (!empty($panier[$produit->getId()]))
+            $panier[$produit->getId()] = min($quantite + $panier[$produit->getId()], $produit->getStock());
+        else $panier[$produit->getId()] = min($quantite, $produit->getStock());
 
         $session->set('panier', $panier);
 
@@ -35,24 +34,32 @@ class PanierController extends AbstractController {
     }
 
     #[Route('/panier', name: 'panier')]
-    public function show(SessionInterface $session): Response {
+    public function show(SessionInterface $session, ProduitRepository $pr): Response {
         $panier = $session->get('panier', []);
+
+        $ids = array_keys($panier);
+        $produits = $pr->getAllProduits($ids);
 
         $tva = 0;
         $total = 0;
-        foreach ($panier as $entree) {
-            $produit = $entree['produit'];
-            $tva += $produit->getPrix() * $entree['quantite'] * $produit->getTauxTva() / 100;
-            $total += $produit->getPrix() * $entree['quantite'];
+        $printablePanier = []; // L'équivalent de l'ancien panier pour l'affichage
+        foreach ($panier as $id => $quantite) {
+            $produit = $produits[$id];
+            $tva += $produit->getPrix() * $quantite * $produit->getTauxTva() / 100;
+            $total += $produit->getPrix() * $quantite;
+
+            $printablePanier[$id] = [
+                'quantite' => $quantite,
+                'produit' => $produit
+            ];
         }
 
         return $this->render('panier/index.html.twig', [
-            'panier' => $panier,
+            'panier' => $printablePanier,
             'total' => $total,
             'tva' => $tva,
         ]);
     }
-
 
     #[Route('/vider-panier', name: 'vider_panier')]
     public function vider(SessionInterface $session): Response {
